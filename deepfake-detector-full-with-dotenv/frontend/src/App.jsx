@@ -16,7 +16,7 @@ function App() {
     formData.append("file", file);
 
     try {
-      const res = await fetch("http://localhost:8000/analyze", {
+      const res = await fetch("https://deepfake-1-kwyh.onrender.com", {
         method: "POST",
         body: formData
       });
