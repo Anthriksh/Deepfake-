@@ -1,4 +1,5 @@
 import React, { useState } from "react";
+import { BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer } from "recharts";
 
 const API_BASE = import.meta.env.VITE_API_BACKEND || "https://deepfake-3.onrender.com";
 
@@ -45,9 +46,24 @@ export default function App() {
     }
   };
 
+  // Prepare chart data
+  const chartData = [
+    {
+      name: "Deepfake",
+      count: history.filter((h) => h.prediction === "deepfake").length,
+    },
+    {
+      name: "Real",
+      count: history.filter((h) => h.prediction === "real").length,
+    },
+  ];
+
   return (
-    <div className={`${darkMode ? "bg-gray-900 text-white" : "bg-gray-100 text-gray-900"} min-h-screen p-6 flex flex-col items-center transition-colors duration-500`}>
-      
+    <div
+      className={`${
+        darkMode ? "bg-gray-900 text-white" : "bg-gray-100 text-gray-900"
+      } min-h-screen p-6 flex flex-col items-center transition-colors duration-500`}
+    >
       {/* Header */}
       <header className="w-full max-w-3xl flex justify-between items-center mb-6">
         <h1 className="text-3xl font-bold flex items-center gap-2">
@@ -57,7 +73,9 @@ export default function App() {
           <select
             value={language}
             onChange={(e) => setLanguage(e.target.value)}
-            className={`${darkMode ? "bg-gray-800 text-white" : "bg-white text-gray-900"} px-3 py-1 rounded transition`}
+            className={`${
+              darkMode ? "bg-gray-800 text-white" : "bg-white text-gray-900"
+            } px-3 py-1 rounded transition`}
           >
             <option>English</option>
             <option>Spanish</option>
@@ -73,7 +91,11 @@ export default function App() {
       </header>
 
       {/* Upload card */}
-      <div className={`${darkMode ? "bg-gray-800" : "bg-white"} w-full max-w-2xl p-6 rounded-2xl shadow-lg mb-6 transition-colors duration-500`}>
+      <div
+        className={`${
+          darkMode ? "bg-gray-800" : "bg-white"
+        } w-full max-w-2xl p-6 rounded-2xl shadow-lg mb-6 transition-colors duration-500`}
+      >
         <input
           type="file"
           accept="image/*,video/*"
@@ -90,29 +112,42 @@ export default function App() {
               <div className="w-5 h-5 border-4 border-white border-t-transparent rounded-full animate-spin"></div>
               Analyzing...
             </div>
-          ) : "Analyze"}
+          ) : (
+            "Analyze"
+          )}
         </button>
 
         {error && <div className="mt-4 text-red-400">{error}</div>}
 
         {result && (
-          <div className={`${darkMode ? "bg-gray-900" : "bg-gray-100"} mt-4 p-4 rounded-lg shadow-inner text-sm transition-colors duration-500`}>
+          <div
+            className={`${
+              darkMode ? "bg-gray-900" : "bg-gray-100"
+            } mt-4 p-4 rounded-lg shadow-inner text-sm transition-colors duration-500`}
+          >
             <strong>File:</strong> {result.file} <br />
             <strong>Prediction:</strong> {result.prediction} <br />
-            <strong>Confidence:</strong> {(result.confidence * 100).toFixed(0)}%
+            <strong>Confidence:</strong>{" "}
+            {(result.confidence * 100).toFixed(0)}%
           </div>
         )}
       </div>
 
-      {/* History tab */}
+      {/* History + Chart */}
       {history.length > 0 && (
-        <div className={`${darkMode ? "bg-gray-800" : "bg-white"} w-full max-w-2xl p-6 rounded-2xl shadow-lg transition-colors duration-500`}>
+        <div
+          className={`${
+            darkMode ? "bg-gray-800" : "bg-white"
+          } w-full max-w-2xl p-6 rounded-2xl shadow-lg transition-colors duration-500`}
+        >
           <h2 className="text-xl font-semibold mb-4">History</h2>
-          <div className="space-y-3 max-h-64 overflow-y-auto">
+          <div className="space-y-3 max-h-64 overflow-y-auto mb-6">
             {history.map((item, index) => (
               <div
                 key={index}
-                className={`${darkMode ? "bg-gray-900 hover:bg-gray-700" : "bg-gray-100 hover:bg-gray-200"} p-3 rounded-lg flex justify-between items-center transition-colors duration-300`}
+                className={`${
+                  darkMode ? "bg-gray-900 hover:bg-gray-700" : "bg-gray-100 hover:bg-gray-200"
+                } p-3 rounded-lg flex justify-between items-center transition-colors duration-300`}
               >
                 <span>{item.file}</span>
                 <span>
@@ -121,6 +156,17 @@ export default function App() {
               </div>
             ))}
           </div>
+
+          {/* Chart */}
+          <h2 className="text-xl font-semibold mb-4">Summary Chart</h2>
+          <ResponsiveContainer width="100%" height={200}>
+            <BarChart data={chartData}>
+              <XAxis dataKey="name" />
+              <YAxis allowDecimals={false} />
+              <Tooltip />
+              <Bar dataKey="count" fill="#4f46e5" />
+            </BarChart>
+          </ResponsiveContainer>
         </div>
       )}
     </div>
