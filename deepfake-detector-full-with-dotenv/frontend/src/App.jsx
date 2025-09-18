@@ -46,17 +46,13 @@ export default function App() {
     }
   };
 
-  // Prepare chart data
   const chartData = [
-    {
-      name: "Deepfake",
-      count: history.filter((h) => h.prediction === "deepfake").length,
-    },
-    {
-      name: "Real",
-      count: history.filter((h) => h.prediction === "real").length,
-    },
+    { name: "Deepfake", count: history.filter((h) => h.prediction === "deepfake").length },
+    { name: "Real", count: history.filter((h) => h.prediction === "real").length },
   ];
+
+  const getPredictionColor = (prediction) =>
+    prediction === "real" ? "text-green-400" : "text-red-400";
 
   return (
     <div
@@ -126,7 +122,9 @@ export default function App() {
             } mt-4 p-4 rounded-lg shadow-inner text-sm transition-colors duration-500`}
           >
             <strong>File:</strong> {result.file} <br />
-            <strong>Prediction:</strong> {result.prediction} <br />
+            <strong>Prediction:</strong>{" "}
+            <span className={getPredictionColor(result.prediction)}>{result.prediction}</span>{" "}
+            <br />
             <strong>Confidence:</strong>{" "}
             {(result.confidence * 100).toFixed(0)}%
           </div>
@@ -146,11 +144,13 @@ export default function App() {
               <div
                 key={index}
                 className={`${
-                  darkMode ? "bg-gray-900 hover:bg-gray-700" : "bg-gray-100 hover:bg-gray-200"
+                  darkMode
+                    ? "bg-gray-900 hover:bg-gray-700"
+                    : "bg-gray-100 hover:bg-gray-200"
                 } p-3 rounded-lg flex justify-between items-center transition-colors duration-300`}
               >
                 <span>{item.file}</span>
-                <span>
+                <span className={getPredictionColor(item.prediction)}>
                   {item.prediction} ({Math.round(item.confidence * 100)}%)
                 </span>
               </div>
