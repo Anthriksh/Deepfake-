@@ -1,62 +1,54 @@
-import { useState } from "react";
+import React, { useState } from "react";
 
-function App() {
+const API_BASE = import.meta.env.VITE_API_BACKEND || "https://deepfake-3.onrender.com";
+
+export default function App() {
   const [file, setFile] = useState(null);
-  const [result, setResult] = useState(null);
   const [loading, setLoading] = useState(false);
+  const [result, setResult] = useState(null);
+  const [error, setError] = useState("");
 
   const handleUpload = async () => {
-    if (!file) {
-      alert("Please select a file first!");
-      return;
-    }
+    if (!file) { setError("Choose a file first"); return; }
+    setError(""); setResult(null); setLoading(true);
 
-    setLoading(true);
     const formData = new FormData();
     formData.append("file", file);
 
     try {
-      const res = await fetch("https://deepfake-1-kwyh.onrender.com", {
+      const res = await fetch(`${API_BASE}/analyze`, {
         method: "POST",
         body: formData
       });
+      if (!res.ok) {
+        const text = await res.text();
+        throw new Error(`Server error ${res.status}: ${text}`);
+      }
       const data = await res.json();
       setResult(data);
-    } catch (err) {
-      console.error(err);
-      alert("Error analyzing file");
+    } catch (e) {
+      console.error(e);
+      setError("Upload failed: " + (e.message || e));
+    } finally {
+      setLoading(false);
     }
-    setLoading(false);
   };
 
   return (
-    <div className="min-h-screen flex flex-col items-center justify-center bg-gray-900 text-white p-6">
-      <h1 className="text-3xl font-bold mb-6">AI Content Detector</h1>
+    <div className="min-h-screen flex items-center justify-center p-6 bg-slate-900 text-white">
+      <div className="max-w-2xl w-full bg-slate-800 p-6 rounded-lg">
+        <h1 className="text-2xl mb-4">AI Content Detector</h1>
 
-      <input
-        type="file"
-        accept="image/*,video/*"
-        onChange={(e) => setFile(e.target.files[0])}
-        className="mb-4"
-      />
-
-      <button
-        onClick={handleUpload}
-        className="bg-blue-500 hover:bg-blue-600 px-6 py-2 rounded-lg"
-      >
-        {loading ? "Analyzing..." : "Upload & Check"}
-      </button>
-
-      {result && (
-        <div className="mt-6 p-4 bg-gray-800 rounded-lg w-full max-w-lg">
-          <h2 className="text-xl mb-2">Result:</h2>
-          <pre className="text-sm whitespace-pre-wrap">
-            {JSON.stringify(result, null, 2)}
-          </pre>
+        <input type="file" accept="image/*,video/*" onChange={e => setFile(e.target.files[0])} />
+        <div className="mt-4 flex gap-3">
+          <button onClick={handleUpload} disabled={loading} className="px-4 py-2 bg-indigo-600 rounded">
+            {loading ? "Analyzing..." : "Analyze"}
+          </button>
         </div>
-      )}
+
+        {error && <div className="mt-4 text-red-400">{error}</div>}
+        {result && <pre className="mt-4 text-xs bg-slate-900 p-3 rounded">{JSON.stringify(result, null, 2)}</pre>}
+      </div>
     </div>
   );
 }
-
-export default App;
