@@ -9,6 +9,7 @@ export default function App() {
   const [history, setHistory] = useState([]);
   const [error, setError] = useState("");
   const [language, setLanguage] = useState("English");
+  const [darkMode, setDarkMode] = useState(true);
 
   const handleUpload = async () => {
     if (!file) {
@@ -45,24 +46,34 @@ export default function App() {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-900 to-indigo-900 text-white p-6 flex flex-col items-center">
+    <div className={`${darkMode ? "bg-gray-900 text-white" : "bg-gray-100 text-gray-900"} min-h-screen p-6 flex flex-col items-center transition-colors duration-500`}>
+      
       {/* Header */}
       <header className="w-full max-w-3xl flex justify-between items-center mb-6">
-        <h1 className="text-3xl font-bold">AI Content Detector</h1>
-        {/* Language selector */}
-        <select
-          value={language}
-          onChange={(e) => setLanguage(e.target.value)}
-          className="bg-slate-800 text-white px-3 py-1 rounded"
-        >
-          <option>English</option>
-          <option>Spanish</option>
-          <option>French</option>
-        </select>
+        <h1 className="text-3xl font-bold flex items-center gap-2">
+          <span>🛡️</span> AI Content Detector
+        </h1>
+        <div className="flex items-center gap-3">
+          <select
+            value={language}
+            onChange={(e) => setLanguage(e.target.value)}
+            className={`${darkMode ? "bg-gray-800 text-white" : "bg-white text-gray-900"} px-3 py-1 rounded transition`}
+          >
+            <option>English</option>
+            <option>Spanish</option>
+            <option>French</option>
+          </select>
+          <button
+            onClick={() => setDarkMode(!darkMode)}
+            className="px-3 py-1 rounded bg-indigo-600 hover:bg-indigo-500 transition"
+          >
+            {darkMode ? "Light Mode" : "Dark Mode"}
+          </button>
+        </div>
       </header>
 
       {/* Upload card */}
-      <div className="w-full max-w-2xl bg-slate-800 p-6 rounded-2xl shadow-lg mb-6">
+      <div className={`${darkMode ? "bg-gray-800" : "bg-white"} w-full max-w-2xl p-6 rounded-2xl shadow-lg mb-6 transition-colors duration-500`}>
         <input
           type="file"
           accept="image/*,video/*"
@@ -72,30 +83,36 @@ export default function App() {
         <button
           onClick={handleUpload}
           disabled={loading}
-          className="w-full py-2 bg-indigo-600 rounded-lg hover:bg-indigo-500 transition"
+          className="w-full py-2 bg-indigo-600 rounded-lg hover:bg-indigo-500 transition relative overflow-hidden"
         >
-          {loading ? "Analyzing..." : "Analyze"}
+          {loading ? (
+            <div className="flex justify-center items-center gap-2">
+              <div className="w-5 h-5 border-4 border-white border-t-transparent rounded-full animate-spin"></div>
+              Analyzing...
+            </div>
+          ) : "Analyze"}
         </button>
 
         {error && <div className="mt-4 text-red-400">{error}</div>}
 
         {result && (
-          <div className="mt-4 p-4 bg-slate-900 rounded-lg shadow-inner text-sm">
+          <div className={`${darkMode ? "bg-gray-900" : "bg-gray-100"} mt-4 p-4 rounded-lg shadow-inner text-sm transition-colors duration-500`}>
+            <strong>File:</strong> {result.file} <br />
             <strong>Prediction:</strong> {result.prediction} <br />
-            <strong>Confidence:</strong> {result.confidence}
+            <strong>Confidence:</strong> {(result.confidence * 100).toFixed(0)}%
           </div>
         )}
       </div>
 
       {/* History tab */}
       {history.length > 0 && (
-        <div className="w-full max-w-2xl bg-slate-800 p-6 rounded-2xl shadow-lg">
+        <div className={`${darkMode ? "bg-gray-800" : "bg-white"} w-full max-w-2xl p-6 rounded-2xl shadow-lg transition-colors duration-500`}>
           <h2 className="text-xl font-semibold mb-4">History</h2>
           <div className="space-y-3 max-h-64 overflow-y-auto">
             {history.map((item, index) => (
               <div
                 key={index}
-                className="p-3 bg-slate-900 rounded-lg flex justify-between items-center"
+                className={`${darkMode ? "bg-gray-900 hover:bg-gray-700" : "bg-gray-100 hover:bg-gray-200"} p-3 rounded-lg flex justify-between items-center transition-colors duration-300`}
               >
                 <span>{item.file}</span>
                 <span>
