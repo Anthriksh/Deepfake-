@@ -1,6 +1,7 @@
 import React, { useState } from "react";
 
-const API_BASE = import.meta.env.VITE_API_BACKEND || "https://deepfake-3.onrender.com";
+// Directly point to Render backend
+const API_BASE = "https://deepfake-3.onrender.com";
 
 export default function App() {
   const [file, setFile] = useState(null);
@@ -9,8 +10,13 @@ export default function App() {
   const [error, setError] = useState("");
 
   const handleUpload = async () => {
-    if (!file) { setError("Choose a file first"); return; }
-    setError(""); setResult(null); setLoading(true);
+    if (!file) {
+      setError("Choose a file first");
+      return;
+    }
+    setError("");
+    setResult(null);
+    setLoading(true);
 
     const formData = new FormData();
     formData.append("file", file);
@@ -39,15 +45,27 @@ export default function App() {
       <div className="max-w-2xl w-full bg-slate-800 p-6 rounded-lg">
         <h1 className="text-2xl mb-4">AI Content Detector</h1>
 
-        <input type="file" accept="image/*,video/*" onChange={e => setFile(e.target.files[0])} />
+        <input
+          type="file"
+          accept="image/*,video/*"
+          onChange={e => setFile(e.target.files[0])}
+        />
         <div className="mt-4 flex gap-3">
-          <button onClick={handleUpload} disabled={loading} className="px-4 py-2 bg-indigo-600 rounded">
+          <button
+            onClick={handleUpload}
+            disabled={loading}
+            className="px-4 py-2 bg-indigo-600 rounded"
+          >
             {loading ? "Analyzing..." : "Analyze"}
           </button>
         </div>
 
         {error && <div className="mt-4 text-red-400">{error}</div>}
-        {result && <pre className="mt-4 text-xs bg-slate-900 p-3 rounded">{JSON.stringify(result, null, 2)}</pre>}
+        {result && (
+          <pre className="mt-4 text-xs bg-slate-900 p-3 rounded">
+            {JSON.stringify(result, null, 2)}
+          </pre>
+        )}
       </div>
     </div>
   );
