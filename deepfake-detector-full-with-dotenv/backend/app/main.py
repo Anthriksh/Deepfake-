@@ -17,8 +17,9 @@ app.add_middleware(
 # Load API credentials from environment variables
 API_USER = os.getenv("SIGHTENGINE_USER")
 API_SECRET = os.getenv("SIGHTENGINE_SECRET")
+
 if not API_USER or not API_SECRET:
-    raise ValueError("SIGHTENGINE_USER and SIGHTENGINE_SECRET must be set")
+    raise ValueError("SIGHTENGINE_USER and SIGHTENGINE_SECRET must be set in environment variables")
 
 @app.get("/")
 def root():
@@ -28,14 +29,14 @@ def root():
 async def analyze(file: UploadFile = File(...)):
     try:
         file_bytes = await file.read()
-        files = {'media': (file.filename, file_bytes)}
+        files = {"media": (file.filename, file_bytes)}
         data = {
-            'models': 'deepfake',  # only deepfake detection
-            'api_user': 1041304254,
-            'api_secret': qpLxptC6nesYP32GjLCKHxb3h7EoskvM
+            "models": "deepfake",   # Sightengine deepfake detection model
+            "api_user": API_USER,
+            "api_secret": API_SECRET
         }
         response = requests.post(
-            'https://api.sightengine.com/1.0/check.json',
+            "https://api.sightengine.com/1.0/check.json",
             files=files,
             data=data
         )
@@ -43,3 +44,5 @@ async def analyze(file: UploadFile = File(...)):
         return response.json()
     except Exception as e:
         raise HTTPException(status_code=502, detail=f"Error analyzing file: {e}")
+
+
