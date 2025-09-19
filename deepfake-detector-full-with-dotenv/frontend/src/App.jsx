@@ -9,7 +9,8 @@ import {
   Legend,
 } from "recharts";
 
-const API_BASE = import.meta.env.VITE_API_BACKEND || "https://deepfake-3.onrender.com";
+const API_BASE =
+  import.meta.env.VITE_API_BACKEND || "https://deepfake-3.onrender.com";
 
 export default function App() {
   const [file, setFile] = useState(null);
@@ -57,9 +58,10 @@ export default function App() {
       }
 
       const data = await res.json();
-      const probability = data.deepfake?.prob ?? 0;
-      const prediction = probability > 0.5 ? "deepfake" : "real";
-      const confidence = probability;
+
+      // ✅ Parse Sightengine response properly
+      const prediction = data.deepfake?.label || "unknown";
+      const confidence = data.deepfake?.prob ?? 0;
 
       const resultData = {
         file: file.name,
@@ -80,8 +82,14 @@ export default function App() {
   };
 
   const chartData = [
-    { name: "Deepfake", count: history.filter((h) => h.prediction === "deepfake").length },
-    { name: "Real", count: history.filter((h) => h.prediction === "real").length },
+    {
+      name: "Deepfake",
+      count: history.filter((h) => h.prediction === "fake").length,
+    },
+    {
+      name: "Real",
+      count: history.filter((h) => h.prediction === "real").length,
+    },
   ];
 
   const getPredictionColor = (prediction) =>
@@ -140,7 +148,11 @@ export default function App() {
 
         {preview && (
           <div className="mb-4 flex justify-center">
-            <img src={preview} alt="preview" className="max-h-48 rounded-lg shadow-md" />
+            <img
+              src={preview}
+              alt="preview"
+              className="max-h-48 rounded-lg shadow-md"
+            />
           </div>
         )}
 
@@ -169,9 +181,12 @@ export default function App() {
           >
             <strong>File:</strong> {result.file} <br />
             <strong>Prediction:</strong>{" "}
-            <span className={getPredictionColor(result.prediction)}>{result.prediction}</span>{" "}
+            <span className={getPredictionColor(result.prediction)}>
+              {result.prediction}
+            </span>{" "}
             <br />
-            <strong>Confidence:</strong> {(result.confidence * 100).toFixed(0)}% <br />
+            <strong>Confidence:</strong>{" "}
+            {(result.confidence * 100).toFixed(0)}% <br />
             <strong>Uploaded at:</strong> {result.time}
           </div>
         )}
@@ -197,7 +212,11 @@ export default function App() {
               >
                 <span className="flex items-center gap-2">
                   {item.preview && (
-                    <img src={item.preview} alt="thumb" className="h-8 w-8 rounded-md object-cover" />
+                    <img
+                      src={item.preview}
+                      alt="thumb"
+                      className="h-8 w-8 rounded-md object-cover"
+                    />
                   )}
                   {item.file}
                 </span>
@@ -224,4 +243,5 @@ export default function App() {
     </div>
   );
 }
+
 
