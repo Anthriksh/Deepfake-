@@ -36,7 +36,7 @@ export default function App() {
 
   const handleUpload = async () => {
     if (!file) {
-      setError("Choose a file first");
+      setError("Please choose a file first.");
       return;
     }
     setError("");
@@ -59,9 +59,10 @@ export default function App() {
 
       const data = await res.json();
 
-      // ✅ Parse Sightengine response properly
-      const prediction = data.deepfake?.label || "unknown";
-      const confidence = data.deepfake?.prob ?? 0;
+      // ✅ Sightengine parsing
+      const deepfakeData = data.deepfake || {};
+      const prediction = deepfakeData.class || "unknown"; // class can be "real" or "fake"
+      const confidence = deepfakeData.probability ?? 0;
 
       const resultData = {
         file: file.name,
@@ -82,14 +83,8 @@ export default function App() {
   };
 
   const chartData = [
-    {
-      name: "Deepfake",
-      count: history.filter((h) => h.prediction === "fake").length,
-    },
-    {
-      name: "Real",
-      count: history.filter((h) => h.prediction === "real").length,
-    },
+    { name: "Deepfake", count: history.filter((h) => h.prediction === "fake").length },
+    { name: "Real", count: history.filter((h) => h.prediction === "real").length },
   ];
 
   const getPredictionColor = (prediction) =>
@@ -104,16 +99,12 @@ export default function App() {
       {/* Header */}
       <header className="w-full max-w-3xl flex justify-between items-center mb-6">
         <h1 className="text-3xl font-bold flex items-center gap-2">
-          <span role="img" aria-label="shield">
-            🛡️
-          </span>
-          AI Content Detector
+          <span role="img" aria-label="shield">🛡️</span> AI Content Detector
         </h1>
         <div className="flex items-center gap-3">
           <select
             value={language}
             onChange={(e) => setLanguage(e.target.value)}
-            title="Select language"
             className={`${
               darkMode ? "bg-gray-800 text-white" : "bg-white text-gray-900"
             } px-3 py-1 rounded transition`}
@@ -124,35 +115,28 @@ export default function App() {
           </select>
           <button
             onClick={() => setDarkMode(!darkMode)}
-            className="px-3 py-1 rounded bg-indigo-600 hover:bg-indigo-500 flex items-center gap-1 transition"
+            className="px-3 py-1 rounded bg-indigo-600 hover:bg-indigo-500 transition"
           >
             {darkMode ? "🌙 Dark" : "☀️ Light"}
           </button>
         </div>
       </header>
 
-      {/* Upload card */}
-      <div
-        className={`${
+      {/* Upload Card */}
+      <div className={`${
           darkMode ? "bg-gray-800" : "bg-white"
         } w-full max-w-2xl p-6 rounded-2xl shadow-lg mb-6 transition-colors duration-500`}
       >
-        <div className="mb-4">
-          <input
-            type="file"
-            accept="image/*,video/*"
-            onChange={handleFileChange}
-            className="w-full text-sm file:bg-indigo-600 file:text-white file:px-4 file:py-2 file:rounded-lg file:border-0 cursor-pointer"
-          />
-        </div>
+        <input
+          type="file"
+          accept="image/*,video/*"
+          onChange={handleFileChange}
+          className="w-full mb-4 text-sm file:bg-indigo-600 file:text-white file:px-4 file:py-2 file:rounded-lg file:border-0 cursor-pointer"
+        />
 
         {preview && (
           <div className="mb-4 flex justify-center">
-            <img
-              src={preview}
-              alt="preview"
-              className="max-h-48 rounded-lg shadow-md"
-            />
+            <img src={preview} alt="preview" className="max-h-48 rounded-lg shadow-md" />
           </div>
         )}
 
@@ -174,50 +158,34 @@ export default function App() {
         {error && <div className="mt-4 text-red-400">{error}</div>}
 
         {result && (
-          <div
-            className={`${
+          <div className={`${
               darkMode ? "bg-gray-900" : "bg-gray-100"
             } mt-4 p-4 rounded-lg shadow-inner text-sm transition-colors duration-500`}
           >
             <strong>File:</strong> {result.file} <br />
             <strong>Prediction:</strong>{" "}
-            <span className={getPredictionColor(result.prediction)}>
-              {result.prediction}
-            </span>{" "}
-            <br />
-            <strong>Confidence:</strong>{" "}
-            {(result.confidence * 100).toFixed(0)}% <br />
+            <span className={getPredictionColor(result.prediction)}>{result.prediction}</span> <br />
+            <strong>Confidence:</strong> {(result.confidence * 100).toFixed(0)}% <br />
             <strong>Uploaded at:</strong> {result.time}
           </div>
         )}
       </div>
 
-      {/* History + Chart */}
+      {/* History & Chart */}
       {history.length > 0 && (
-        <div
-          className={`${
+        <div className={`${
             darkMode ? "bg-gray-800" : "bg-white"
           } w-full max-w-2xl p-6 rounded-2xl shadow-lg transition-colors duration-500`}
         >
           <h2 className="text-xl font-semibold mb-4">History</h2>
           <div className="space-y-3 max-h-64 overflow-y-auto mb-6">
             {history.map((item, index) => (
-              <div
-                key={index}
-                className={`${
-                  darkMode
-                    ? "bg-gray-900 hover:bg-gray-700"
-                    : "bg-gray-100 hover:bg-gray-200"
+              <div key={index} className={`${
+                  darkMode ? "bg-gray-900 hover:bg-gray-700" : "bg-gray-100 hover:bg-gray-200"
                 } p-3 rounded-lg flex justify-between items-center transition-colors duration-300`}
               >
                 <span className="flex items-center gap-2">
-                  {item.preview && (
-                    <img
-                      src={item.preview}
-                      alt="thumb"
-                      className="h-8 w-8 rounded-md object-cover"
-                    />
-                  )}
+                  {item.preview && <img src={item.preview} alt="thumb" className="h-8 w-8 rounded-md object-cover" />}
                   {item.file}
                 </span>
                 <span className={getPredictionColor(item.prediction)}>
@@ -227,7 +195,6 @@ export default function App() {
             ))}
           </div>
 
-          {/* Chart */}
           <h2 className="text-xl font-semibold mb-4">Summary Chart</h2>
           <ResponsiveContainer width="100%" height={200}>
             <BarChart data={chartData}>
@@ -243,5 +210,3 @@ export default function App() {
     </div>
   );
 }
-
-
