@@ -21,7 +21,8 @@
     "vite": "^5.1.0"
   },
   "engines": {
-    "node": ">=18"                     // Ensure Node version compatibility
+    "node": ">=18"                
   }
 }
+
 
