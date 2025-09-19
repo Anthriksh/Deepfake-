@@ -36,8 +36,18 @@ export default function App() {
       }
 
       const data = await res.json();
-      setResult(data);
-      setHistory([{ file: file.name, ...data }, ...history]);
+      const probability = data.deepfake?.prob ?? 0;
+      const prediction = probability > 0.5 ? "deepfake" : "real";
+      const confidence = probability;
+
+      const resultData = {
+        file: file.name,
+        prediction,
+        confidence,
+      };
+
+      setResult(resultData);
+      setHistory([resultData, ...history]);
     } catch (e) {
       console.error(e);
       setError("Upload failed: " + (e.message || e));
@@ -125,8 +135,7 @@ export default function App() {
             <strong>Prediction:</strong>{" "}
             <span className={getPredictionColor(result.prediction)}>{result.prediction}</span>{" "}
             <br />
-            <strong>Confidence:</strong>{" "}
-            {(result.confidence * 100).toFixed(0)}%
+            <strong>Confidence:</strong> {(result.confidence * 100).toFixed(0)}%
           </div>
         )}
       </div>
