@@ -31,8 +31,8 @@ async def analyze(file: UploadFile = File(...)):
         files = {'media': (file.filename, file_bytes)}
         data = {
             'models': 'deepfake',  # only deepfake detection
-            'api_user': API_USER,
-            'api_secret': API_SECRET
+            'api_user': 1041304254,
+            'api_secret': qpLxptC6nesYP32GjLCKHxb3h7EoskvM
         }
         response = requests.post(
             'https://api.sightengine.com/1.0/check.json',
