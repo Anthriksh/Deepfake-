@@ -3,20 +3,24 @@
   "version": "1.0.0",
   "private": true,
   "scripts": {
-    "dev": "vite",
-    "build": "vite build",
-    "preview": "vite preview"
+    "dev": "vite",                     // Starts Vite dev server
+    "build": "vite build",             // Build for production
+    "preview": "vite preview",         // Preview production build locally
+    "start": "vite preview"            // Alias for start, works like npm start
   },
   "dependencies": {
-    "axios": "^1.5.1",
+    "axios": "^1.5.1",                 // For API requests
     "react": "^18.2.0",
     "react-dom": "^18.2.0"
   },
   "devDependencies": {
-    "@vitejs/plugin-react": "^4.1.0",
-    "autoprefixer": "^10.4.15",
+    "@vitejs/plugin-react": "^4.1.0",  // React plugin for Vite
+    "autoprefixer": "^10.4.15",        // Tailwind dependency
     "postcss": "^8.4.31",
     "tailwindcss": "^3.3.3",
     "vite": "^5.1.0"
+  },
+  "engines": {
+    "node": ">=18"                     // Ensure Node version compatibility
   }
 }
