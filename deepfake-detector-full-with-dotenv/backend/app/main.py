@@ -29,20 +29,21 @@ def root():
 async def analyze(file: UploadFile = File(...)):
     try:
         file_bytes = await file.read()
-        files = {"media": (file.filename, file_bytes)}
+        files = {"media": (file.filename, file_bytes, file.content_type)}
         data = {
-            "models": "deepfake",   # Sightengine deepfake detection model
+            "models": "genai",   # ✅ correct model
             "api_user": API_USER,
             "api_secret": API_SECRET
         }
+
         response = requests.post(
             "https://api.sightengine.com/1.0/check.json",
             files=files,
             data=data
         )
         response.raise_for_status()
-        return response.json()
+        result = response.json()
+        return result
+
     except Exception as e:
         raise HTTPException(status_code=502, detail=f"Error analyzing file: {e}")
-
-
