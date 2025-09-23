@@ -2,48 +2,57 @@ import os
 import requests
 from fastapi import FastAPI, UploadFile, File, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
+from dotenv import load_dotenv
+
+load_dotenv()
 
 app = FastAPI()
 
-# Enable CORS so frontend can talk to backend
+# Enable CORS for frontend
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["*"],  # change to frontend domain in production
+    allow_origins=["*"],  # ⚠️ In production, restrict to frontend domain
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
 )
 
-# Load API credentials from environment variables
+# Load Sightengine credentials
 API_USER = os.getenv("SIGHTENGINE_USER")
 API_SECRET = os.getenv("SIGHTENGINE_SECRET")
 
 if not API_USER or not API_SECRET:
-    raise ValueError("SIGHTENGINE_USER and SIGHTENGINE_SECRET must be set in environment variables")
+    raise RuntimeError("❌ Sightengine credentials missing in .env")
 
-@app.get("/")
-def root():
-    return {"message": "Backend live with Sightengine"}
+SIGHTENGINE_URL = "https://api.sightengine.com/1.0/check.json"
 
 @app.post("/analyze")
-async def analyze(file: UploadFile = File(...)):
+async def analyze_file(file: UploadFile = File(...)):
     try:
-        file_bytes = await file.read()
-        files = {"media": (file.filename, file_bytes, file.content_type)}
+        # Send file to Sightengine
+        files = {"media": (file.filename, await file.read())}
         data = {
-            "models": "genai",   # ✅ correct model
+            "models": "genai",
             "api_user": API_USER,
-            "api_secret": API_SECRET
+            "api_secret": API_SECRET,
         }
 
-        response = requests.post(
-            "https://api.sightengine.com/1.0/check.json",
-            files=files,
-            data=data
-        )
-        response.raise_for_status()
+        response = requests.post(SIGHTENGINE_URL, files=files, data=data)
         result = response.json()
-        return result
+
+        if result.get("status") != "success":
+            raise HTTPException(status_code=400, detail=result)
+
+        genai = result.get("genai", {})
+        is_ai = genai.get("ai_generated", False)
+        confidence = genai.get("confidence", 0.0)
+
+        # ✅ Clean response for frontend
+        return {
+            "file": file.filename,
+            "prediction": "fake" if is_ai else "real",
+            "confidence": confidence,
+        }
 
     except Exception as e:
-        raise HTTPException(status_code=502, detail=f"Error analyzing file: {e}")
+        raise HTTPException(status_code=500, detail=str(e))
